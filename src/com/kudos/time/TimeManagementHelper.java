@@ -1,0 +1,348 @@
+package com.kudos.time;
+import java.sql.*;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.*;
+import java.util.*;
+import java.util.Date;
+import com.kudos.jdbc.DatabseHelper;
+import com.kudos.profile.HrmsEmployee;
+import com.kudos.time.EmployeeDailyAttendance;
+import com.kudos.time.DayObject;
+import com.kudos.util.DateUtil;
+public class TimeManagementHelper{
+	public String DBUser;
+	public String DBPswd;
+	public String DBUrl ;
+	
+	public TimeManagementHelper(){ }
+	
+	public TimeManagementHelper(String inDBUser, String inDBPswd, String inDBUrl ){
+		DBUser = inDBUser;
+		DBPswd = inDBPswd;
+		DBUrl  = inDBUrl;
+	}
+	public DayObject getCurDateYearMonthDayDBObj(){
+		DayObject dateYearMonthDayDBObj = new DayObject();
+		GregorianCalendar calendar = new GregorianCalendar();
+		String month = Integer.toString((calendar.get(Calendar.MONTH) + 1));
+		String day   = Integer.toString(calendar.get(Calendar.DATE));
+		String year  = Integer.toString(calendar.get(Calendar.YEAR));
+		if( month != null && month.length() < 2 ) month = "0"+month; 
+		if( day != null && day.length() < 2 ) day = "0"+day;
+		String date1 = year+"-"+month+"-"+day;
+		Date dateStr = DateUtil.getDate(date1, DateUtil._YYYY_MM_DD);
+		
+		dateYearMonthDayDBObj.todayDate = dateStr;
+		dateYearMonthDayDBObj.month = getMonth(calendar.get(Calendar.MONTH));
+		dateYearMonthDayDBObj.day = getDay(calendar.get(Calendar.DAY_OF_WEEK));
+		dateYearMonthDayDBObj.year = calendar.get(Calendar.YEAR);
+		
+		System.out.println("YEAR: " + calendar.get(Calendar.YEAR));
+		System.out.println("MONTH: " + calendar.get(Calendar.MONTH));
+		System.out.println("WEEK_OF_YEAR: " + calendar.get(Calendar.WEEK_OF_YEAR));
+		System.out.println("DATE: " + calendar.get(Calendar.DATE));
+		System.out.println("DAY_OF_WEEK: " + calendar.get(Calendar.DAY_OF_WEEK));
+		return dateYearMonthDayDBObj;
+	}
+	public String dayDateMonth(){
+		GregorianCalendar calendar = new GregorianCalendar();
+        System.out.println("date-"+calendar.getTime());
+        String str=calendar.getTime().toString();
+        System.out.println("date-"+str);
+        String []strArray=str.split(" ");
+        ArrayList<String> list=new ArrayList<String>();
+        for (int i=0;i<6;i++){
+            if(!strArray[i].equals("IST")){
+                list.add(strArray[i]);
+            }
+            
+            
+        }
+        String finalDate="";
+        for(int i=0;i<list.size();i++){
+           // System.out.println(list.get(i));
+            finalDate=finalDate.concat(list.get(i));
+            if(list.size()-i==1){
+                
+            }else{
+              finalDate= finalDate.concat(" ") ;
+            }
+        }
+        System.out.println("final date-"+finalDate);
+       
+        return finalDate;
+	}
+	public String getDay( int day ){
+		String strDay= "";
+		if(day == 1) strDay = "SUN";
+		else if(day == 2) strDay = "MON";
+		else if(day == 3) strDay = "TUS";
+		else if(day == 4) strDay = "WED";
+		else if(day == 5) strDay = "THU";
+		else if(day == 6) strDay = "FRI";
+		else if(day == 7) strDay = "SAT";
+		return strDay;
+	}
+	public String getMonth( int month ){
+		String strMonth = "";
+		if(month == 0) strMonth = "JAN";
+		else if(month == 1) strMonth = "FEB";
+		else if(month == 2 ) strMonth = "MAR";
+		else if(month == 3) strMonth = "APR";
+		else if(month == 4) strMonth = "MAY";
+		else if(month == 5) strMonth = "JUN";
+		else if(month == 6) strMonth = "JUL";
+		else if(month == 7) strMonth = "AUG";
+		else if(month == 8) strMonth = "SEP"; 
+		else if(month == 9) strMonth = "OCT";
+		else if(month == 10) strMonth = "NOV";
+		else if(month == 11) strMonth = "DEC";
+		return strMonth;
+	}
+	public void initializeEmpDailyAttendanceDBObj(EmployeeDailyAttendance inEmpDailyAttendanceDBObj ){
+		inEmpDailyAttendanceDBObj.empId   =  "";
+		inEmpDailyAttendanceDBObj.empName = ""; 
+		inEmpDailyAttendanceDBObj.todayDate  = new Date();
+		inEmpDailyAttendanceDBObj.month  = "";
+		inEmpDailyAttendanceDBObj.day = "";
+		inEmpDailyAttendanceDBObj.year = 0;
+		inEmpDailyAttendanceDBObj.inTime = "";
+		inEmpDailyAttendanceDBObj.outTime = "";
+		inEmpDailyAttendanceDBObj.remark = "";
+	}
+	public EmployeeDailyAttendance getRecordByPrimaryKey(String inEmpId, String inTodayDate){
+		EmployeeDailyAttendance  empDailyAttendanceDBObj = new EmployeeDailyAttendance();
+		try{
+			System.out.println("DBUser=="+DBUser+",DBPswd=="+DBPswd+",DBUrl=="+DBUrl);
+//			DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
+//			Connection conn= DriverManager.getConnection(DBUrl,DBUser,DBPswd);
+			Connection connection = DatabseHelper.getConnection();
+			Statement stmt = connection.createStatement();
+			String lSqlString =	"select * from EMPLOYEE_DAILY_ATTENDANCE  ";
+			lSqlString = lSqlString + "where emp_id='"+inEmpId+"' ";
+			lSqlString = lSqlString + "and today_date='"+inTodayDate+"' ";
+			System.out.println("**********************************");
+			ResultSet rs  = null;
+			rs  = stmt.executeQuery(lSqlString);
+			System.out.println("lSqlString====trtrt==within getRecordByPrimaryKey== "+lSqlString);
+			if( rs.next()){
+				System.out.println("TimeManagementHelper.getRecordByPrimaryKey()####");
+				System.out.println("fffff==="+rs.getString("emp_id"));
+				empDailyAttendanceDBObj.empId   =  (String)rs.getString("emp_id");
+				empDailyAttendanceDBObj.empName = (String)rs.getString("emp_name"); 
+                
+				if(rs.getDate("today_date")!=null)
+				{
+					Date date=rs.getDate("today_date");
+					empDailyAttendanceDBObj.todayDate = date;
+				}
+					//	empDailyAttendanceDBObj.todayDate  = (String)rs.getString("today_date");
+				empDailyAttendanceDBObj.month  = (String)rs.getString("month");
+				empDailyAttendanceDBObj.day = (String)rs.getString("day");
+				empDailyAttendanceDBObj.year = rs.getLong("year");
+
+//				String intime=rs.getString("in_time");
+//				if(intime!=null)
+//				empDailyAttendanceDBObj.inTime = intime.substring(11,16);
+//				String outtime=rs.getString("out_time");
+//				if(outtime!=null)
+//				empDailyAttendanceDBObj.outTime = outtime.substring(11,16);
+
+				empDailyAttendanceDBObj.inTime = (String)rs.getString("in_time");
+				empDailyAttendanceDBObj.outTime = (String)rs.getString("out_time");
+				
+				empDailyAttendanceDBObj.remark = (String)rs.getString("remark");
+				System.out.println("fffffyyyyyyyy==="+rs.getString("emp_id"));
+				System.out.println("empName===== "+empDailyAttendanceDBObj.empName);
+				System.out.println("todayDate===== "+empDailyAttendanceDBObj.todayDate);
+				System.out.println("month===== "+empDailyAttendanceDBObj.month);
+				System.out.println("day===== "+empDailyAttendanceDBObj.day);
+				System.out.println("year===== "+empDailyAttendanceDBObj.year);
+				System.out.println("inTime===== "+empDailyAttendanceDBObj.inTime);
+				System.out.println("outTime===== "+empDailyAttendanceDBObj.outTime);
+				System.out.println("remark===== "+empDailyAttendanceDBObj.remark);
+				
+			}
+			else{
+				initializeEmpDailyAttendanceDBObj(empDailyAttendanceDBObj);
+			}
+			System.out.println("ffffftttttttttttt====="+empDailyAttendanceDBObj.empId);
+		}
+		catch(SQLException  ex){
+			ex.printStackTrace();
+		}
+		return empDailyAttendanceDBObj;
+	}
+	public ArrayList selectEmpDailyAttendanceByCriteria(String inCriteria){
+		ArrayList EmpDailyAttendanceList = new ArrayList();
+		
+		try{
+//			DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
+//			Connection conn= DriverManager.getConnection(DBUrl,DBUser,DBPswd);
+
+			Connection connection = DatabseHelper.getConnection();
+			Statement stmt = connection.createStatement();
+			String lSqlString =	"select * from EMPLOYEE_DAILY_ATTENDANCE";
+			if( inCriteria != null && inCriteria.length() > 0 ){
+				lSqlString = lSqlString +" "+inCriteria+"" ;
+			}
+			System.out.println("Criteria===== "+inCriteria+" and query="+lSqlString);
+			ResultSet rs  = null;
+			rs  = stmt.executeQuery(lSqlString);
+			while( rs.next()){
+				
+				EmployeeDailyAttendance  empDailyAttendanceDBObj = new EmployeeDailyAttendance();
+				empDailyAttendanceDBObj.empId   =  (String)rs.getString("emp_id");
+				empDailyAttendanceDBObj.empName = (String)rs.getString("emp_name"); 
+				System.out.println("empId===== "+empDailyAttendanceDBObj.empId);
+				System.out.println("empName===== "+empDailyAttendanceDBObj.empName);
+				if(rs.getDate("today_date")!=null)
+				{
+					Date date=rs.getDate("today_date");
+					empDailyAttendanceDBObj.todayDate = date;
+				}
+				//empDailyAttendanceDBObj.todayDate  = (String)rs.getString("today_date");
+				System.out.println("todayDate===== "+empDailyAttendanceDBObj.todayDate);
+				empDailyAttendanceDBObj.month  = (String)rs.getString("month");
+				System.out.println("month===== "+empDailyAttendanceDBObj.month);
+				empDailyAttendanceDBObj.day = (String)rs.getString("day");
+				System.out.println("day===== "+empDailyAttendanceDBObj.day);
+				
+				empDailyAttendanceDBObj.year = rs.getLong("year");
+
+				System.out.println("year===== "+empDailyAttendanceDBObj.year);
+//				String intime=rs.getString("in_time");
+//				if(intime!=null)
+//				empDailyAttendanceDBObj.inTime = intime.substring(11,16);
+//				System.out.println("inTime===== "+empDailyAttendanceDBObj.inTime);
+//				String outtime=rs.getString("out_time");
+//				if(outtime!=null)
+//				empDailyAttendanceDBObj.outTime = outtime.substring(11,16);
+//				System.out.println("outTime===== "+empDailyAttendanceDBObj.outTime);
+
+				empDailyAttendanceDBObj.inTime = (String)rs.getString("in_time");
+				empDailyAttendanceDBObj.outTime = (String)rs.getString("out_time");
+				empDailyAttendanceDBObj.remark = (String)rs.getString("remark");
+				System.out.println("empName===== "+empDailyAttendanceDBObj.empName);
+				System.out.println("todayDate===== "+empDailyAttendanceDBObj.todayDate);
+				System.out.println("month===== "+empDailyAttendanceDBObj.month);
+				System.out.println("day===== "+empDailyAttendanceDBObj.day);
+				System.out.println("year===== "+empDailyAttendanceDBObj.year);
+				System.out.println("inTime===== "+empDailyAttendanceDBObj.inTime);
+				System.out.println("outTime===== "+empDailyAttendanceDBObj.outTime);
+				System.out.println("remark===== "+empDailyAttendanceDBObj.remark);
+				
+				
+				EmpDailyAttendanceList.add(empDailyAttendanceDBObj);
+			}
+		}
+		catch(SQLException  ex){
+			ex.printStackTrace();
+		}
+		return EmpDailyAttendanceList;
+	}
+	public int updateEmpDailyAttendanceDBObjByPrimaryKey(EmployeeDailyAttendance inEmpDailyAttendanceDBObj){
+		int recupd = 0;
+		String lQuery = "";
+		lQuery = lQuery +"update EMPLOYEE_DAILY_ATTENDANCE set emp_name='"+inEmpDailyAttendanceDBObj.empName+"' "; 
+		lQuery = lQuery +" , month='"+inEmpDailyAttendanceDBObj.month+"' ";
+		lQuery = lQuery +" , day='"+inEmpDailyAttendanceDBObj.day+"' ";
+		lQuery = lQuery +" , year="+inEmpDailyAttendanceDBObj.year+" ";
+
+//		lQuery = lQuery +" , in_time=to_date('"+inEmpDailyAttendanceDBObj.todayDate+" "+inEmpDailyAttendanceDBObj.inTime+"','yyyy-mm-dd HH24:MI') ";
+//		lQuery = lQuery +" , out_time=to_date('"+inEmpDailyAttendanceDBObj.todayDate+" "+inEmpDailyAttendanceDBObj.outTime+"','yyyy-mm-dd HH24:MI') ";
+//		
+
+		lQuery = lQuery +" , in_time='"+inEmpDailyAttendanceDBObj.inTime+"' ";
+		lQuery = lQuery +" , out_time='"+inEmpDailyAttendanceDBObj.outTime+"' ";
+		
+		
+		lQuery = lQuery +" , remark='"+inEmpDailyAttendanceDBObj.remark+"' ";
+		lQuery = lQuery + "where emp_id='"+inEmpDailyAttendanceDBObj.empId+"' ";
+		String todayDateStr = DateUtil.getDateText(inEmpDailyAttendanceDBObj.todayDate, DateUtil._YYYY_MM_DD);
+		lQuery = lQuery +" and today_date='"+todayDateStr+"' ";
+		
+		//lQuery = lQuery + "and today_date='"+inEmpDailyAttendanceDBObj.todayDate+"' ";
+		System.out.println("lSqlString===:"+lQuery);
+		try{
+//			DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
+//			Connection conn= DriverManager.getConnection(DBUrl,DBUser,DBPswd);
+			
+			Connection connection = DatabseHelper.getConnection();
+			Statement stmt = connection.createStatement();
+			recupd  = stmt.executeUpdate(lQuery);
+		}
+		catch(SQLException  ex){
+			ex.printStackTrace();
+		}
+		return recupd;
+	}
+	public EmployeeDailyAttendance populateEmpDailyAttendanceDBObjFromReq(HttpServletRequest inReq){
+		EmployeeDailyAttendance  popEmpDailyAttendanceDBObj = new EmployeeDailyAttendance();
+		popEmpDailyAttendanceDBObj.empId   =  (String)inReq.getParameter("empId");
+		popEmpDailyAttendanceDBObj.empName = (String)inReq.getParameter("empName"); 
+		String  todayDateStr = (String)inReq.getParameter("todayDate");
+		 
+		 if(todayDateStr !=null )
+		 {   // current code by kk
+			 System.out.println("todayDateStr---vivek---"+todayDateStr);
+			 Calendar cal=Calendar.getInstance();
+			 String year=new Integer(cal.get(cal.YEAR)).toString();
+			 String month=new Integer(cal.get(cal.MONTH)+1).toString();
+			 String day=new Integer(cal.get(cal.DATE)).toString();
+			 todayDateStr=year+"-"+month+"-"+day;//end of current code
+			 System.out.println("vivek.......todayDateStr-"+todayDateStr);
+			 Date date = DateUtil.getDate(todayDateStr, DateUtil._YYYY_MM_DD);
+			 popEmpDailyAttendanceDBObj.todayDate = date;
+		 }
+		//popEmpDailyAttendanceDBObj.todayDate  = (String)inReq.getParameter("todayDate");
+		popEmpDailyAttendanceDBObj.month  = (String)inReq.getParameter("month");
+		popEmpDailyAttendanceDBObj.day = (String)inReq.getParameter("day");
+		popEmpDailyAttendanceDBObj.year = Long.parseLong((String)inReq.getParameter("year"));
+		popEmpDailyAttendanceDBObj.inTime = (String)inReq.getParameter("inTime");
+		popEmpDailyAttendanceDBObj.outTime = (String)inReq.getParameter("outTime");
+		popEmpDailyAttendanceDBObj.remark = (String)inReq.getParameter("remark");
+		return popEmpDailyAttendanceDBObj;
+	}
+	public int insertEmpDailyAttendanceDBObj(EmployeeDailyAttendance inEmpDailyAttendanceDBObj){
+		int recupd = 0; 
+		String lQuery = "";
+		lQuery = lQuery +"insert into EMPLOYEE_DAILY_ATTENDANCE  values ( ";
+		lQuery = lQuery +" '"+inEmpDailyAttendanceDBObj.empId+"'  ";
+		lQuery = lQuery +" , '"+inEmpDailyAttendanceDBObj.empName+"'  ";
+		String todayDateStr = DateUtil.getDateText(inEmpDailyAttendanceDBObj.todayDate, DateUtil._YYYY_MM_DD);
+		lQuery = lQuery +" , '"+todayDateStr+"' ";
+		
+		//lQuery = lQuery +" , '"+inEmpDailyAttendanceDBObj.todayDate+"'  "; 
+		lQuery = lQuery +" , '"+inEmpDailyAttendanceDBObj.month+"' ";
+		lQuery = lQuery +" , '"+inEmpDailyAttendanceDBObj.day+"' ";
+		lQuery = lQuery +" , "+inEmpDailyAttendanceDBObj.year+" ";
+
+//		lQuery = lQuery +" , to_date('"+inEmpDailyAttendanceDBObj.todayDate+" "+inEmpDailyAttendanceDBObj.inTime+"','yyyy-mm-dd HH24:MI') ";
+//		lQuery = lQuery +" , to_date('"+inEmpDailyAttendanceDBObj.todayDate+" "+inEmpDailyAttendanceDBObj.outTime+"','yyyy-mm-dd HH24:MI') ";
+//		
+
+		lQuery = lQuery +" , '"+inEmpDailyAttendanceDBObj.inTime+"' ";
+		lQuery = lQuery +" , '"+inEmpDailyAttendanceDBObj.outTime+"' ";
+		
+		
+		lQuery = lQuery +" , '"+inEmpDailyAttendanceDBObj.remark+"' ";
+		lQuery = lQuery + " )";
+		System.out.println("lSqlString===:"+lQuery);
+		try{
+//			DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
+//			Connection conn= DriverManager.getConnection(DBUrl,DBUser,DBPswd);
+			
+			Connection connection = DatabseHelper.getConnection();
+			
+			Statement stmt = connection.createStatement();
+			recupd  = stmt.executeUpdate(lQuery);
+		}
+		catch(SQLException  ex){
+			ex.printStackTrace();
+		}
+		return recupd;
+	}
+}

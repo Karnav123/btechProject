@@ -1,0 +1,105 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+    <%@ page session = "true" %>
+   
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<title>localhost:hrsolution.com/insert</title>
+	<link rel="stylesheet" href=".../css/mystyle.css" type="text/css" />
+	
+	<script type="text/javascript" language="javascript" src="scripts/validation.js"></script>
+	
+</head>
+
+<body>
+	<table width="900" border="0" align="center">
+		<tr>
+			<td colspan="2"><%@ include file="/jsp/ersHeader.jsp" %></td>
+		</tr>
+		<tr>
+			<td width="150">
+				<%@ include file="../hrmsMainMenu.jsp" %>
+			</td>
+			
+			<td  width="750" valign="top" align="center">
+				<p>&nbsp;</p>
+				Enter the profile detail for new employee.
+				<hr  width=100% color=#34383E>
+				<table border="0" align="top" width=100%>
+					<form name="profile" method="post"  onSubmit="return validateProfileInsert(this);">
+						<tr>
+							<td>Employee ID</td>
+							<td align="left"><input type="text" name='empId' id='empId' size='10' value=''/></td>
+							<td>&nbsp;</td>
+							<td align="left"> &nbsp;</td>
+						</tr>
+						<tr>
+							<td>First Name</td>
+							<td align="left"><input type="text" name='empFirstName' id='empFirstName' size='20' value=''/></td>
+							<td colspan=2>Middle Name&nbsp;&nbsp;&nbsp;<input type="text" name='empMiddleName' id='empMiddleName' size='10' value=''/>
+								&nbsp;&nbsp;&nbsp;Last Name&nbsp;&nbsp;&nbsp;<input type="text" name='empLastName' id='empLastName' size='10' value=''/>
+							</td>							
+						</tr>
+						<tr>
+							<td>Orgnization ID</td>
+							<td align="left"><input type="text" name='orgId' id='orgId' size='10' value=''/></td>
+							<td >Designation</td>
+							<td align="left"><input type="text" name='levelId' id='levelId' size='20' value=''/></td>													
+						</tr>
+						<tr>
+							<td>Department</td>
+							<td align="left"><input type="text" name='deptId' id='deptId' size='10' value=''/></td>
+							<td >Date of Birth</td>
+							<td align="left"><input type="text" name='dateOfBirth' id='dateOfBirth' size='10' value=''/>(yyyy-mm-dd)</td>													
+						</tr>
+						<tr>
+							<td>Join Date</td>
+							<td align="left"><input type="text" name='dateOfJoin' id='dateOfJoin' size='10' value=''/>(yyyy-mm-dd)</td>
+							<td >&nbsp;</td>
+							<td >&nbsp;</td>													
+						</tr>
+						<tr>
+							<td>Address 1</td>
+							<td align="left" colspan="2"><input type="text" name='address1' id='address1' size='40' value=''/></td>
+							<td >&nbsp;</td>
+							<td >&nbsp;</td>													
+						</tr>
+						<tr>
+							<td>Address 2</td>
+							<td align="left" colspan="2"><input type="text" name='address2' id='address2' size='40' value=''/></td>
+							<td >&nbsp;</td>
+							<td >&nbsp;</td>													
+						</tr>
+						<tr>
+							<td>City</td>
+							<td align="left"><input type="text" name='city' id='city' size='10' value=''/></td>
+							<td >&nbsp;</td>
+							<td >&nbsp;</td>													
+						</tr>
+						<tr>
+							<td>State</td>
+							<td align="left"><input type="text" name='state' id='state' size='10' value=''/></td>
+							<td >Nationality</td>
+							<td align="left"><input type="text" name='nationality' id='nationality' size='10' value=''/></td>													
+						</tr>
+						<tr>
+							<td align="center" colspan="4">
+							<input type="submit" name='submit' id='submit' size='10' value='Submit'/>
+							<input type="hidden" name='actionSubmit' id='actionSubmit' size='10' value='HrmsEmployeeInsertSubmit'/></td>													
+						</tr>
+					</form>
+					
+				</table>
+				<hr width=100% color=#34383E>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><%@include file="../hrmsFooter.jsp" %></td>
+		</tr>
+	</table>
+
+</body>
+</html>
